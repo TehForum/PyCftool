@@ -77,7 +77,7 @@ class MainWindow(QMainWindow):
         self.y_fit_interpolate = np.zeros(y.shape[0]*10)
         self.y_fit = None
 
-        self.ui = loadUiWidget('pycftoolGUIV2.ui')
+        self.ui = loadUiWidget('pycftoolGUI.ui')
         self.ui.label_2.setText('')
         self.ui.textEdit.setVisible(False)
         self.setCentralWidget(self.ui)
