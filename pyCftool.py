@@ -1,28 +1,11 @@
-import sys, os
+import sys
 import numpy as np
 import scipy.optimize
-
-from pyside_dynamic import loadUi
-from PySide6.QtCore import QThread, Signal, QTimer, QLine
 from PySide6.QtWidgets import QStackedWidget, QApplication, QFileDialog, QWidget, QMainWindow
 from PySide6 import QtCore, QtGui, QtUiTools
 from mplwidget import MplWidget
-from matplotlib import pyplot as plt
 from scipy import optimize as optim
 import re
-
-def pyCftool(x=None, y=None, weights=None,local_vars = None):
-    #local_vars = locals().copy()
-    for item in list(local_vars):
-        if not isinstance(local_vars[item],np.ndarray):
-            del local_vars[item]
-    app = QApplication(sys.argv)
-    mainwindow = MainWindow(x,y,local_variables=local_vars)
-    mainwindow.setWindowTitle('CfTool')
-    mainwindow.resize(1400, 900)
-    mainwindow.show()
-    sys.exit(app.exec())
-
 
 class function():
     def __init__(self, eq):
@@ -51,7 +34,6 @@ class function():
     def func(self, x, *args):
         dictin = {}
         eq = self.eq
-        print(self.vars)
         for i in range(len(args)):
             dictin[self.vars[i]] = args[i]
         return eval(eq)
@@ -67,17 +49,19 @@ def loadUiWidget(uifilename, parent=None):
     return ui
 
 class MainWindow(QMainWindow):
-    def __init__(self,x=None,y=None,local_variables=None):
+    def __init__(self,x,y,local_variables=None):
         QMainWindow.__init__(self)
+        self.ui = loadUiWidget('pycftoolGUI.ui')
         self.x = x
         self.y = y
         self.weights = None
         self.local_vars = local_variables
+        self.local_vars['X pycftool'] = x
+        self.local_vars['Y pycftool'] = y
+
         self.x_interpolate = np.linspace(x[0],x[-1],x.shape[0]*10)
         self.y_fit_interpolate = np.zeros(y.shape[0]*10)
         self.y_fit = None
-
-        self.ui = loadUiWidget('pycftoolGUI.ui')
         self.ui.label_2.setText('')
         self.ui.textEdit.setVisible(False)
         self.setCentralWidget(self.ui)
@@ -90,14 +74,16 @@ class MainWindow(QMainWindow):
         self.ui.checkBox_2.stateChanged.connect(self.interpolate)
 
         self.ui.comboBox.currentTextChanged.connect(self.equation_select)
-        self.ui.xDataComboBox.currentTextChanged.connect(self.comboXData)
-        self.ui.yDataComboBox.currentTextChanged.connect(self.comboYData)
 
         self.ui.degreeComboBox.currentTextChanged.connect(self.degreeBox)
 
         self.ui.xDataComboBox.addItems(self.local_vars)
         self.ui.yDataComboBox.addItems(self.local_vars)
         self.ui.weightsComboBox.addItems(self.local_vars)
+        self.ui.xDataComboBox.setCurrentText('X pycftool')
+        self.ui.yDataComboBox.setCurrentText('Y pycftool')
+        self.ui.xDataComboBox.currentTextChanged.connect(self.comboXData)
+        self.ui.yDataComboBox.currentTextChanged.connect(self.comboYData)
 
         #Variables
         self.order = 0
@@ -122,7 +108,6 @@ class MainWindow(QMainWindow):
 ##########  MECHANICS
     def initiate_fit(self):
         self.ui.label_3.setText('')
-        print("Fitting!")
         if self.eq_setting == 'polynomial':
             self.polynomial_fit()
 
@@ -131,7 +116,6 @@ class MainWindow(QMainWindow):
         elif self.eq_setting == 'resonance 1':
             self.resonance_fit_1()
         elif self.eq_setting == 'resonance 2':
-            print('Resonance fitting_2')
             self.resonance_fit_2()
         elif self.eq_setting == 'custom equation':
             txtbox = self.ui.textEdit.toPlainText()
@@ -179,6 +163,9 @@ class MainWindow(QMainWindow):
     def customChanged(self):
         if self.ui.checkBox.isChecked():
             self.initiate_fit()
+
+    def export_fit(self):
+        pass
 #########################
 
 #########CHECKBOX######
@@ -348,7 +335,6 @@ class MainWindow(QMainWindow):
         customFit = function(eq)
         parameters = customFit.vars
         self.n_vars = len(parameters)
-        print(parameters)
         popt, pcov = optim.curve_fit(customFit.func, self.x, self.y,p0=np.ones(len(parameters)))
         self.covars = np.sqrt(np.diag(pcov))
 
@@ -391,19 +377,25 @@ class MainWindow(QMainWindow):
         self.rmse()
         self.chiSquared()
 
-if __name__ == '__main__':
-    x = np.linspace(-5,5,100)+np.random.normal(0,scale=0.01,size=100)
-    noise = np.random.normal(0,scale=0.1,size=100)
-    #y = 3/np.sqrt((x**2-4)**2+1*x**2)+noise  #Ressonance 1
-    #y = 6.6*x**2-3*x+0.3+noise #Polynomial
-    y = 2*x+0.2+2.2*np.sin(1.1*x)+noise
-    local_vars = locals().copy()
-    for item in list(local_vars):
-        if not isinstance(local_vars[item],np.ndarray):
-            del local_vars[item]
+def pyCftool(x=None, y=None, weights=None,local_vars = None):
+    if local_vars != None:
+        for item in list(local_vars):
+            if not isinstance(local_vars[item],np.ndarray):
+                del local_vars[item]
+    else:
+        local_vars = []
     app = QApplication(sys.argv)
     mainwindow = MainWindow(x,y,local_variables=local_vars)
     mainwindow.setWindowTitle('CfTool')
     mainwindow.resize(1400, 900)
     mainwindow.show()
     sys.exit(app.exec())
+
+if __name__ == '__main__':
+    x = np.linspace(-5,5,100)+np.random.normal(0,scale=0.1,size=100)
+    noise = np.random.normal(0,scale=0.1,size=100)
+    y = 3/np.sqrt((x**2-4)**2+1*x**2)+noise  #Ressonance 2
+    #y = 6.6*x**2-3*x+0.3+noise #Polynomial
+    #y = 2*x+0.2+2.2*np.sin(1.1*x)+noise
+    lv = locals().copy()
+    pyCftool(x,y,local_vars=lv)
