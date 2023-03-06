@@ -63,7 +63,7 @@ Import the function `from pyCftool import pyCftool`.
 
 ## Examples
 ### Polynomial fit
-<pre>
+```Python
 import numpy as np
 from pyCftool import pyCftool
 
@@ -72,7 +72,7 @@ noise = np.random.normal(0,scale=0.1,size=100)
 y = 6.6*x**2-3*x+0.3+noise # Polynomial
 lv = locals().copy()
 pyCftool(x,y,local_vars=lv)
-</pre>
+```
 Will produce a window like this:
 <p align="center">
   <img src="https://user-images.githubusercontent.com/126679979/223142476-ce64f1be-8425-4d75-8ac6-3852d485a9c6.png" width="750">
@@ -85,7 +85,7 @@ The 'best-fit' parameters are listed in the window on the right hand side. The b
 ### Costum Fit
 We can also make the program fit any function we desire.
 
-<pre>
+```Python
 import numpy as np
 from pyCftool import pyCftool
 
@@ -94,7 +94,7 @@ noise = np.random.normal(0,scale=0.1,size=100)
 y = 2*x+0.2+2.2*np.sin(1.1*x)+noise # Linear with sinus wave
 lv = locals().copy()
 pyCftool(x,y,local_vars=lv)
-</pre>
+```
 By selecting `Custom Equation` from the dropdown menu at the top, we can input our own equations. In this case we want to use the formula $y=ax+b+A\sin(\omega x)$.
 <p align="center">
   <img src="https://user-images.githubusercontent.com/126679979/223147572-3dd52297-9254-404b-9c0e-e82a0a0a9470.png" width="800">
