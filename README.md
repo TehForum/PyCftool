@@ -7,7 +7,7 @@ Heavily inspired by matlabs interactive curvefitter (Cftool), this program attem
 ## Features
 
 #### Easy access to data via dropdown menu
-Using the argument `local_vars` it is possible to pass multiple arrays to the GUI. From two dropdown menus (**X Data** and **Y Data**) it is possible to select, which x and y data the program should fit for.
+Using the argument `local_vars` it is possible to pass multiple arrays to the GUI. From two dropdown menus (**X Data** and **Y Data**) it is possible to select, which x and y data the program should fit tp.
 
 #### Automatic fitting
 Everytime the program detects a change in any option, it will automatically fit a new line using the new parameters. This can be disabled by unchecking **Auto Fit** in the top right corner. By doing so, a fit will only be computed once the **Fit** Button, located undero **Auto Fit** is pressed.
