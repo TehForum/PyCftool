@@ -10,7 +10,7 @@ Heavily inspired by matlabs interactive curvefitter (Cftool), this program attem
 Using the argument `local_vars` it is possible to pass multiple arrays to the GUI. From two dropdown menus (**X Data** and **Y Data**) it is possible to select, which x and y data the program should fit to.
 
 #### Automatic fitting
-Everytime the program detects a change in any option, it will automatically fit a new line using the new parameters. This can be disabled by unchecking **Auto Fit** in the top right corner. By doing so, a fit will only be computed once the **Fit** Button, located undero **Auto Fit** is pressed.
+Everytime the program detects a change in any option, it will automatically fit a new line using these new options. This can be disabled by unchecking **Auto Fit** in the top right corner. By doing so, a fit will only be computed once the **Fit** Button, located under **Auto Fit**, is pressed.
 
 #### Multiple equation support
 From a dropdown menu it is possible to use a wide variety of predefined functions. So far these include
@@ -26,38 +26,40 @@ From a dropdown menu it is possible to use a wide variety of predefined function
 Choosing **Custom Equation** from the dropdown menu, it's possible to fit to any equation you desire!  
 
 #### Interpolation
-The fit will by default contain as many datapoints as the input data. When using a small amount of datapoints or fitting "pointy" functions, checking **Interpolation** will give the fit line a smoother appearence. Note that this ONLY influences how the fit appear on the graph and not any of the actual fit parameters.
+The fit will by default contain as many datapoints as the input data. When using a small amount of datapoints or fitting "pointy" functions, checking the **Interpolation** box will give the fit line a smoother appearence. Note that this ONLY influences how the fit appear on the graph and not any of the actual fit parameters.
 
 #### Display Window
 The left hand side contains a window that displays the current fit model, best fit parameters and GOF analysis.<br>
-The best fit parameters come with a one $\sigma$ (68%) confidence interval. The program calculates the fits **SSE, R-Squard, Adjusted R-Squared, RMSE** and 
-and if weights have been given the $\chi$**-squared** of the model*.<br>
-*Currently weights have no function in pyCftool, but will come in future updates. 
+The best fit parameters come with a one $\sigma$ (68%) confidence interval. The program calculates the **SSE, R-Squard, Adjusted R-Squared, RMSE**, and 
+if weights have been given, the $\chi$**-squared** of the model.<br>
 
+#### Export to .py file
+Under **"File"** you can choose to **"Export"**, which will create a .py file. This file will contain code, that generates the fit parameters that are used in plotting the graph.
 
 #### To be implemented
 
-- Save and export
-- Weights
 - Robust
 - Fit options
 - Residual options
+- Save
 - Multiple plots
 - 3D curve fit
-
+## Prerequisite
+Is currently supported for Python >=3.7.<br>
+Requires the following packages to be installed: [PySide6](https://pypi.org/project/PySide6), Matplotlib, Scipy and Numpy.
 ## Usage
 Import the function `from pyCftool import pyCftool`.
 
 ### pyCftool
-#### pyCftool(x ,y ,weights=None ,local_vars=None)
+#### pyCftool(x=None ,y=None ,weights=None ,local_vars={})
 &nbsp; Opens an interactive fitting program.<br>
 
-&nbsp;&nbsp;  **Parameters:&nbsp;&nbsp; x :&nbsp;&nbsp; one-dimensional numpy array of length N**<br>
+&nbsp;&nbsp;  **Parameters:&nbsp;&nbsp; x :&nbsp;&nbsp; one-dimensional numpy array of length N, optional**<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The x component of the data that will immediately be displayed and fitted for once the GUI opens. <br><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**y :&nbsp;&nbsp; one-dimensional numpy array of length N**<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**y :&nbsp;&nbsp; one-dimensional numpy array of length N, optional**<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The y component of the data that will immediately be displayed and fitted for once the GUI opens. <br><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**weights :&nbsp;&nbsp; float or one-dimensional numpy arrayof length N, optional**<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The weights of each datapoint. Currently has no function, but will in the future be used to give better &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fit estimate and calculate $\chi$-squared.<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The weights of each datapoint. Defined as being $w=1/\sigma$, where $\sigma$ is the uncertainty of the datapoints.<br><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**local_vars :&nbsp;&nbsp; dictionary, optional**<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A dictionary can be passed, but only values that are of type `np.ndarray` will be accessable by the &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GUI.  A dropdown menu in the GUI allows the user to freely choose between the arrays contained in &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the dictionary. Passing the built-in function `locals()` will give the GUI access to all previously &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;defined numpy arrays.<br><br>
 
@@ -77,7 +79,7 @@ Will produce a window like this:
 <p align="center">
   <img src="https://user-images.githubusercontent.com/126679979/223142476-ce64f1be-8425-4d75-8ac6-3852d485a9c6.png" width="750">
 </p>
-The 'best-fit' parameters are listed in the window on the right hand side. The bounds are within one σ (68%) standard deviation. Since this is a second order polynomial, we can select order = 2 from the dropdown menu. The fitter will automatically fit unless `Auto Fit` has been unchecked. The resultning image will become
+The 'best-fit' parameters are listed in the window on the right hand side. The bounds are within one σ (68%) standard deviation. Since this is a second order polynomial, we can select Degree = 2 from the dropdown menu. The fitter will automatically fit unless **"Auto Fit"** has been unchecked. The resultning image will become
 <p align="center">
   <img src="https://user-images.githubusercontent.com/126679979/223142544-2cb848c2-d10e-4f64-9940-1dcb8dcbfca8.png" width="750">
 </p>
