@@ -82,7 +82,7 @@ The 'best-fit' parameters are listed in the window on the right hand side. The b
   <img src="https://user-images.githubusercontent.com/126679979/223142544-2cb848c2-d10e-4f64-9940-1dcb8dcbfca8.png" width="750">
 </p>
 
-### Costum Fit
+### Custom Fit
 We can also make the program fit any function we desire.
 
 ```Python
