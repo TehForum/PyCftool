@@ -1,19 +1,21 @@
 # PyCftool
 Heavily inspired by matlabs interactive curvefitter (Cftool), this program attempts to copy its fantastic features for use in python.
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/126679979/223150375-aeb987d4-94f5-4167-9fbc-2d6ae54f81b6.png" width="850">
+  <img src="https://user-images.githubusercontent.com/126679979/224439240-eed3dccd-48ca-4e11-8626-7d01737bfc71.png" width="850">
 </p>
+
+
 
 ## Features
 
 #### Easy access to data via dropdown menu
-Using the argument `local_vars` it is possible to pass multiple arrays to the GUI. From two dropdown menus (**X Data** and **Y Data**) it is possible to select, which x and y data the program should fit to.
+Using the argument `local_vars` you can pass multiple arrays to the GUI. From two dropdown menus (**X Data** and **Y Data**) you can choose to select, which x and y data the program should fit to.
 
 #### Automatic fitting
-Everytime the program detects a change in any option, it will automatically fit a new line using these new options. This can be disabled by unchecking **Auto Fit** in the top right corner. By doing so, a fit will only be computed once the **Fit** Button, located under **Auto Fit**, is pressed.
+Everytime the program detects a change in any option, it will automatically fit a new line using these new options. This can be disabled by unchecking **Auto Fit** in the top right corner. By doing so, a fit will only be computed once the **Fit** button, located under **Auto Fit**, is pressed.
 
 #### Multiple equation support
-From a dropdown menu it is possible to use a wide variety of predefined functions. So far these include
+From a dropdown menu it's possible to use a wide variety of predefined functions. So far these include
 | Name | Equation |
 | ------------- | ------------- |
 | Polynomial of N degree  | $$y= \sum_{k=0}^N  a_kx^{(N-k)}$$ |
@@ -36,10 +38,22 @@ if weights have been given, the $\chi$**-squared** of the model.<br>
 #### Export to .py file
 Under **"File"** you can choose to **"Export"**, which will create a .py file. This file will contain code, that generates the fit parameters that are used in plotting the graph.
 
+
+#### Robust
+The dropdown menu **Robust** gives access to different fitting algorithms. Default is the [Levenberg–Marquardt algorithm](https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm) (least squares). For bounded problems, the algorithm is automatically set to **TRF**. For more information on the different fitting algorithms check the [scipy.optimize.curve_fit](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html) documentation.
+
+
+#### Fit Options
+Fit options opens a window in which it's possible to adjust the initial variable guess as well as their boundaries.
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/126679979/224429671-37055759-0699-423b-ac3a-c03bb2786744.png">
+</p>
+
+
+
+
 #### To be implemented
 
-- Robust
-- Fit options
 - Residual options
 - Save
 - Multiple plots
@@ -47,6 +61,10 @@ Under **"File"** you can choose to **"Export"**, which will create a .py file. T
 ## Prerequisite
 Is currently supported for Python >=3.7.<br>
 Requires the following packages to be installed: [PySide6](https://pypi.org/project/PySide6), Matplotlib, Scipy and Numpy.
+
+## Installation
+Will soon be on pip! For now the only way to install it to copy all the files into your working directory.
+
 ## Usage
 Import the function `from pyCftool import pyCftool`.
 
@@ -77,11 +95,12 @@ pyCftool(x,y,local_vars=lv)
 ```
 Will produce a window like this:
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/126679979/223142476-ce64f1be-8425-4d75-8ac6-3852d485a9c6.png" width="750">
+  <img src="https://user-images.githubusercontent.com/126679979/224442985-5fab6f97-f30e-434c-a589-4333bb88d86b.png" width="750">
 </p>
+
 The 'best-fit' parameters are listed in the window on the right hand side. The bounds are within one σ (68%) standard deviation. Since this is a second order polynomial, we can select Degree = 2 from the dropdown menu. The fitter will automatically fit unless **"Auto Fit"** has been unchecked. The resultning image will become
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/126679979/223142544-2cb848c2-d10e-4f64-9940-1dcb8dcbfca8.png" width="750">
+  <img src="https://user-images.githubusercontent.com/126679979/224443057-5b3694d3-3b18-4388-8119-e2d7481b9e04.png" width="750">
 </p>
 
 ### Custom Fit
@@ -99,5 +118,5 @@ pyCftool(x,y,local_vars=lv)
 ```
 By selecting `Custom Equation` from the dropdown menu at the top, we can input our own equations. In this case we want to use the formula $y=ax+b+A\sin(\omega x)$.
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/126679979/223147572-3dd52297-9254-404b-9c0e-e82a0a0a9470.png" width="800">
+  <img src="https://user-images.githubusercontent.com/126679979/224443276-b7090965-3f31-4869-9dba-ec738aa47ac0.png" width="800">
 </p>
