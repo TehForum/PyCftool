@@ -9,6 +9,9 @@ from mplwidget import MplWidget
 from scipy import optimize as optim
 import re
 from export import export_fit
+from loadgui import loadUiWidget
+from options import Options_
+
 
 class function():
     def __init__(self, eq):
@@ -42,19 +45,12 @@ class function():
         return eval(eq)
 
 
-def loadUiWidget(uifilename, parent=None):
-    loader = QtUiTools.QUiLoader()
-    uifile = QtCore.QFile(uifilename)
-    uifile.open(QtCore.QFile.ReadOnly)
-    loader.registerCustomWidget(MplWidget)
-    ui = loader.load(uifile, parent)
-    uifile.close()
-    return ui
-
 class MainWindow(QMainWindow):
     def __init__(self,x,y,weights,local_variables):
         QMainWindow.__init__(self)
         self.ui = loadUiWidget('pycftoolGUI.ui')
+        self.setCentralWidget(self.ui)
+
         self.x = x
         self.y = y
         self.weights = weights
@@ -85,7 +81,6 @@ class MainWindow(QMainWindow):
 
         self.ui.label_2.setText('')
         self.ui.textEdit.setVisible(False)
-        self.setCentralWidget(self.ui)
         self.MplWidget = self.ui.mplwidget.canvas
         self.ui.pushButton_2.clicked.connect(self.Button_2)
         self.ui.pushButton.clicked.connect(self.manual_fit)
@@ -96,7 +91,7 @@ class MainWindow(QMainWindow):
         self.ui.checkBox_2.stateChanged.connect(self.interpolate)
 
         self.ui.comboBox.currentTextChanged.connect(self.equation_select)
-
+        self.ui.robustComboBox.currentTextChanged.connect(self.robust_select)
         self.ui.degreeComboBox.currentTextChanged.connect(self.degreeBox)
 
         self.ui.xDataComboBox.currentTextChanged.connect(self.comboXData)
@@ -114,7 +109,9 @@ class MainWindow(QMainWindow):
         self.paramvals = 0
         self.n_vars = 0
         self.p0 = []
+        self.bounds = (np.array([-np.inf]),np.array([np.inf]))
         self.eq_setting = 'polynomial'
+        self.robust = 'lm'
 
         #GOF Variables
         self.SSE= 0
@@ -153,6 +150,10 @@ class MainWindow(QMainWindow):
     def initiate_fit(self,bypass=False):
         if isinstance(self.x,np.ndarray) and isinstance(self.y,np.ndarray):
             self.ui.label_3.setText('')
+            if (np.any(self.bounds[0]!=-np.inf) or np.any(self.bounds[1]!=np.inf)) and self.robust=='lm':
+                self.ui.robustComboBox.setCurrentIndex(1)
+                return
+
             if self.eq_setting == 'polynomial':
                 self.polynomial_fit()
 
@@ -165,10 +166,7 @@ class MainWindow(QMainWindow):
             elif self.eq_setting == 'custom equation':
                 txtbox = self.ui.textEdit.toPlainText()
                 if txtbox and self.customFilter(txtbox):
-                    try:
-                        self.custom_fit(txtbox)
-                    except:
-                        self.ui.label_3.setText('Could not understand input text')
+                    self.custom_fit(txtbox)
 
             self.update(bypass=bypass)
 
@@ -212,7 +210,16 @@ class MainWindow(QMainWindow):
     def export_fit(self):
         export_dir = QFileDialog.getSaveFileName(self, 'Save','','Python file (*.py)')[0]
         if export_dir != '':
-            export_fit(self.eq_str,self.params, self.paramvals,self.weights, export_dir)
+            if (np.any(self.bounds[0] != -np.inf) or np.any(self.bounds[1] != np.inf)):
+                bound = self.bounds
+            else:
+                bound = None
+            if self.robust !='lm':
+                method=self.robust
+            else:
+                method=None
+
+            export_fit(self.eq_str,self.params, self.p0,self.weights, export_dir,bound=bound,method=method)
 #####################s####
 
 #########CHECKBOX######
@@ -227,7 +234,18 @@ class MainWindow(QMainWindow):
         self.initiate_fit(bypass=True)
 
     def Button_2(self):
-        pass
+        options = Options_(self.params,self.p0,self.bounds[0],self.bounds[1])
+        options.resize(463,self.n_vars*50+50)
+        options.setWindowTitle('Fit options')
+        options.exec()
+        self.p0 = options.return_start
+        self.bounds = options.return_bounds
+        if np.any(self.p0<self.bounds[0]):
+            self.ui.label_3.setText("Error: Start point is lower than lower limit!!!")
+        elif np.any(self.p0>self.bounds[1]):
+            self.ui.label_3.setText("Error: Start point is higher than upper limit!!!")
+        else:
+            self.initiate_fit()
 
 ############################
 
@@ -281,6 +299,15 @@ class MainWindow(QMainWindow):
             self.ui.degreeComboBox.setVisible(True)
             self.ui.degreeComboBox.setDisabled(True)
         self.initiate_fit()
+
+    def robust_select(self,value):
+        if value == 'Least Squares':
+            self.robust = 'lm'
+        elif value == 'TRF':
+            self.robust = 'trf'
+        else:
+            self.robust = 'dogbox'
+        self.initiate_fit()
 #############################################
 
 
@@ -315,7 +342,7 @@ class MainWindow(QMainWindow):
         self.ui.listWidget.addItem('Coefficients (with standard deviation bounds):')
         for i, parameter in enumerate(self.params):
             self.ui.listWidget.addItem('    '+parameter+' =     '+str(np.round(self.paramvals[i],5))
-                                       +'    ('+str(np.round(self.paramvals[i]+self.covars[i],5))+'  '+str(np.round(self.paramvals[i]-self.covars[i],5))+')')
+                                       +'    ('+str(np.round(self.paramvals[i]-self.covars[i],5))+'  '+str(np.round(self.paramvals[i]+self.covars[i],5))+')')
 
         self.ui.listWidget.addItem('')
         self.ui.listWidget.addItem('Goodness of fit')
@@ -338,6 +365,11 @@ class MainWindow(QMainWindow):
         parameters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'j', 'k']
         select = parameters[0:self.order + 1]
         self.n_vars = len(select)
+        if len(self.bounds[0])!=self.n_vars:
+            self.bounds = (np.array([-np.inf for i in range(self.n_vars)]),np.array([np.inf for i in range(self.n_vars)]))
+        if len(self.p0) != self.n_vars:
+            self.p0 = [0 for i in range(self.n_vars)]
+
         popt, pcov = np.polyfit(self.x, self.y, self.order,w=self.weights, cov=True)
         eq_str = (''.join([select[i] + '*x^' + str((self.order - i)) + '+' for i in range(len(select)-1)])+select[-1]).replace('^1','')
         self.covars = np.sqrt(np.diag(pcov))
@@ -351,10 +383,21 @@ class MainWindow(QMainWindow):
 
     def exponential(self,x,a,b):
         return b*np.exp(x*a)
-    def exponential_fit(self,p0=[0,0]):
+
+    def exponential_fit(self):
         parameters = ['a', 'b']
         self.n_vars = 2
-        popt, pcov = scipy.optimize.curve_fit(self.exponential,self.x, self.y, p0, sigma=self.sigma)
+        if len(self.bounds[0])!=self.n_vars:
+            self.bounds = (np.array([-np.inf, -np.inf]),np.array([np.inf, np.inf]))
+        if len(self.p0) != self.n_vars:
+            self.p0 = [0 for i in range(self.n_vars)]
+
+
+        popt, pcov = scipy.optimize.curve_fit(self.exponential,self.x, self.y,
+                                              p0=self.p0,
+                                              sigma=self.sigma,
+                                              bounds=self.bounds,
+                                              method=self.robust)
         eq_str = "b*exp(a*x)"
         self.covars = np.sqrt(np.diag(pcov))
         self.paramvals = popt
@@ -368,10 +411,19 @@ class MainWindow(QMainWindow):
     def resonance1(self,x,a,b,c):
         return a*x/np.sqrt((x**2-b)**2+c*x**2)
 
-    def resonance_fit_1(self,p0=[1,1,1]):
-        parameters = ['a', 'b','c']
+    def resonance_fit_1(self):
+        parameters = ['a', 'b', 'c']
         self.n_vars = 3
-        popt, pcov = scipy.optimize.curve_fit(self.resonance1,self.x,self.y,p0,sigma = self.sigma)
+        if len(self.bounds[0]) != self.n_vars:
+            self.bounds = (np.array([-np.inf, -np.inf, -np.inf]),np.array([np.inf, np.inf, np.inf]))
+        if len(self.p0) != self.n_vars:
+            self.p0 = [0 for i in range(self.n_vars)]
+
+        popt, pcov = scipy.optimize.curve_fit(self.resonance1,self.x,self.y,
+                                              p0=self.p0,
+                                              sigma = self.sigma,
+                                              bounds=self.bounds,
+                                              method=self.robust)
 
         eq_str = "a*x/sqrt((x^2-b)^2+c*x^2)"
         self.covars = np.sqrt(np.diag(pcov))
@@ -386,10 +438,19 @@ class MainWindow(QMainWindow):
     def resonance2(self,x,a,b,c):
         return a/np.sqrt((x**2-b)**2+c*x**2)
 
-    def resonance_fit_2(self,p0=[1,1,1]):
+    def resonance_fit_2(self):
         parameters = ['a', 'b','c']
         self.n_vars = 3
-        popt, pcov = scipy.optimize.curve_fit(self.resonance2,self.x,self.y,p0, sigma = self.sigma)
+        if len(self.bounds[0])!=self.n_vars:
+            self.bounds = (np.array([-np.inf, -np.inf, -np.inf]),np.array([np.inf, np.inf, np.inf]))
+        if len(self.p0) != self.n_vars:
+            self.p0 = [1 for i in range(self.n_vars)]
+
+        popt, pcov = scipy.optimize.curve_fit(self.resonance2,self.x,self.y,
+                                              p0=self.p0,
+                                              sigma = self.sigma,
+                                              bounds=self.bounds,
+                                              method=self.robust)
 
         eq_str = "a/sqrt((x^2-b)^2+c*x^2)"
         self.covars = np.sqrt(np.diag(pcov))
@@ -406,7 +467,27 @@ class MainWindow(QMainWindow):
         customFit = function(eq)
         parameters = customFit.vars
         self.n_vars = len(parameters)
-        popt, pcov = optim.curve_fit(customFit.func, self.x, self.y,p0=np.ones(len(parameters)),sigma = self.sigma)
+        if len(self.bounds[0])!=self.n_vars:
+            self.bounds = (np.array([-np.inf for i in range(self.n_vars)]),np.array([np.inf for i in range(self.n_vars)]))
+        if len(self.p0) != self.n_vars:
+            self.p0 = [0 for i in range(self.n_vars)]
+
+        try:
+            customFit.func(self.x,*self.p0) #Checks if the input works when put into the function
+        except:
+            self.ui.label_3.setText("Could not understand input.")
+            return
+
+        try:
+            popt, pcov = optim.curve_fit(customFit.func, self.x, self.y,
+                                         p0=self.p0,
+                                         sigma = self.sigma,
+                                         bounds=self.bounds,
+                                         method=self.robust)
+        except:
+            self.ui.label_3.setText("Could not find a stable solution. Try changing the initial parameters.")
+            return
+
         self.covars = np.sqrt(np.diag(pcov))
 
         self.eq_str = eq
@@ -418,7 +499,6 @@ class MainWindow(QMainWindow):
 
         if self.ui.checkBox_2.isChecked():
             self.y_fit_interpolate = customFit.func(self.x_interpolate,*popt)
-
 
 ###################
 
@@ -462,12 +542,15 @@ def pyCftool(x=None, y=None, weights=None,local_vars = {}):
     mainwindow.show()
     sys.exit(app.exec())
 
-if __name__ == '__main__':
-    x = np.linspace(-5,5,100)+np.random.normal(0,scale=0.1,size=100)
-    noise = np.random.normal(0,scale=0.1,size=100)
-    weights = 1/noise
+def main():
+    x = np.linspace(-10,10,1000)+np.random.normal(0,scale=0.1,size=1000)
+    noise = np.random.normal(0,scale=1,size=1000)
+    weights = 1/np.std(noise)*np.ones(1000)
     #y = 3/np.sqrt((x**2-4)**2+1*x**2)+noise  #Ressonance 2
     #y = 6.6*x**2-3*x+0.3+noise #Polynomial
     y = 2*x+0.2+2.2*np.sin(1.1*x)+noise
     lv = locals().copy()
-    pyCftool(x,y,weights)
+    pyCftool(x,y,weights=weights,local_vars=lv)
+
+if __name__ == '__main__':
+    main()
