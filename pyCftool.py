@@ -134,7 +134,7 @@ class MainWindow(QMainWindow):
         self.ui.yDataComboBox.setCurrentText('Y pycftool')
 
     def ComboBoxWeights_initialize(self):
-        self.sigma = 1 / weights
+        self.sigma = 1 / self.weights
         self.local_vars['Weights pycftool'] = self.weights
         self.ui.weightsComboBox.addItems(['Weights pycftool'])
         self.ui.weightsComboBox.setCurrentText('Weights pycftool')
