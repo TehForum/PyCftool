@@ -63,13 +63,13 @@ Is currently supported for Python >=3.7.<br>
 Requires the following packages to be installed: [PySide6](https://pypi.org/project/PySide6), Matplotlib, Scipy and Numpy.
 
 ## Installation
-Will soon be on pip! For now the only way to install it to copy all the files into your working directory.
+You can install pyCftool with: `pip install pyCftool`.
 
 ## Usage
 Import the function `from pyCftool import pyCftool`.
 
 ### pyCftool
-#### pyCftool(x=None ,y=None ,weights=None ,local_vars={})
+#### cftool(x=None ,y=None ,weights=None ,local_vars={})
 &nbsp; Opens an interactive fitting program.<br>
 
 &nbsp;&nbsp;  **Parameters:&nbsp;&nbsp; x :&nbsp;&nbsp; one-dimensional numpy array of length N, optional**<br>
@@ -85,13 +85,13 @@ Import the function `from pyCftool import pyCftool`.
 ### Polynomial fit
 ```Python
 import numpy as np
-from pyCftool import pyCftool
+from pyCftool import cftool
 
 x = np.linspace(-5,5,100)+np.random.normal(0,scale=0.01,size=100)
 noise = np.random.normal(0,scale=0.1,size=100)
 y = 6.6*x**2-3*x+0.3+noise # Polynomial
 lv = locals().copy()
-pyCftool(x,y,local_vars=lv)
+cftool(x,y,local_vars=lv)
 ```
 Will produce a window like this:
 <p align="center">
@@ -108,13 +108,13 @@ We can also make the program fit any function we desire.
 
 ```Python
 import numpy as np
-from pyCftool import pyCftool
+from pyCftool import cftool
 
 x = np.linspace(-5,5,100)+np.random.normal(0,scale=0.01,size=100)
 noise = np.random.normal(0,scale=0.1,size=100)
 y = 2*x+0.2+2.2*np.sin(1.1*x)+noise # Linear with sinus wave
 lv = locals().copy()
-pyCftool(x,y,local_vars=lv)
+cftool(x,y,local_vars=lv)
 ```
 By selecting `Custom Equation` from the dropdown menu at the top, we can input our own equations. In this case we want to use the formula $y=ax+b+A\sin(\omega x)$.
 <p align="center">
