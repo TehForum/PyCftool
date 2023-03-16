@@ -1,17 +1,13 @@
 import sys
-
-import PySide6.QtGui
 import numpy as np
 import scipy.optimize
-from PySide6.QtWidgets import QStackedWidget, QApplication, QFileDialog, QWidget, QMainWindow
-from PySide6 import QtCore, QtGui, QtUiTools
-from mplwidget import MplWidget
+from PySide6.QtWidgets import  QApplication, QFileDialog, QMainWindow
 from scipy import optimize as optim
 import re
 from export import export_fit
 from loadgui import loadUiWidget
 from options import Options_
-
+from pathlib import Path
 
 class function():
     def __init__(self, eq):
@@ -26,7 +22,7 @@ class function():
         list_eq = re.split(r'(\W+)', s)
         vars = []
         for i, char in enumerate(list_eq):
-            if char not in key_words and re.match(r'[(+\-*^x)]', char) == None:
+            if char not in key_words and re.match(r'[(+\-*^/x)]', char) == None:
                 vars.append(char)
                 list_eq[i] = f'dictin[\'{char}\']'
             elif char in numpy_words:
@@ -48,7 +44,9 @@ class function():
 class MainWindow(QMainWindow):
     def __init__(self,x,y,weights,local_variables):
         QMainWindow.__init__(self)
-        self.ui = loadUiWidget('pycftoolGUI.ui')
+        this_directory = Path(__file__).parent
+
+        self.ui = loadUiWidget(this_directory / "pycftoolGUI.ui")
         self.setCentralWidget(self.ui)
 
         self.x = x
@@ -68,7 +66,7 @@ class MainWindow(QMainWindow):
             self.ComboBoxX_initialize()
             self.x_span = np.max(x) - np.min(x)
             self.x_fit = np.linspace(self.x[0] - self.x_span * 0.6, self.x[-1] + self.x_span * 0.6, self.x.shape[0])
-            self.x_interpolate = np.linspace(x[0] - self.x_span * 0.6, x[-1] + self.x_span * 0.6, x.shape[0] * 100)
+            self.x_interpolate = np.linspace(self.x[0] - self.x_span * 0.6, self.x[-1] + self.x_span * 0.6, x.shape[0] * 100)
         if not isinstance(y, type(None)):
             self.ComboBoxY_initialize()
             self.y_fit_interpolate = np.zeros(y.shape[0] * 10)
@@ -208,7 +206,9 @@ class MainWindow(QMainWindow):
             self.initiate_fit()
 
     def export_fit(self):
-        export_dir = QFileDialog.getSaveFileName(self, 'Save','','Python file (*.py)')[0]
+        file_name = self.ui.fitNameLineEdit_2.text()
+        export_dir = QFileDialog.getSaveFileName(self, 'Save',file_name,'Python file (*.py)')[0]
+
         if export_dir != '':
             if (np.any(self.bounds[0] != -np.inf) or np.any(self.bounds[1] != np.inf)):
                 bound = self.bounds
@@ -218,7 +218,6 @@ class MainWindow(QMainWindow):
                 method=self.robust
             else:
                 method=None
-
             export_fit(self.eq_str,self.params, self.p0,self.weights, export_dir,bound=bound,method=method)
 #####################s####
 
@@ -254,7 +253,7 @@ class MainWindow(QMainWindow):
         self.x = self.local_vars[value]
         self.x_span = np.max(self.x)-np.min(self.x)
         self.x_fit = np.linspace(self.x[0]-self.x_span*0.1,self.x[-1]+self.x_span*0.1,self.x.shape[0])
-        self.x_interpolate = np.linspace(x[0] - self.x_span * 0.6, x[-1] + self.x_span * 0.6, x.shape[0] * 100)
+        self.x_interpolate = np.linspace(self.x[0] - self.x_span * 0.6, self.x[-1] + self.x_span * 0.6, self.x.shape[0] * 100)
         self.initiate_fit()
 
     def comboYData(self,value):
@@ -476,6 +475,7 @@ class MainWindow(QMainWindow):
             customFit.func(self.x,*self.p0) #Checks if the input works when put into the function
         except:
             self.ui.label_3.setText("Could not understand input.")
+            raise
             return
 
         try:
@@ -530,7 +530,7 @@ class MainWindow(QMainWindow):
         self.rmse()
         self.chiSquared()
 
-def pyCftool(x=None, y=None, weights=None,local_vars = {}):
+def cftool(x=None, y=None, weights=None,local_vars = {}):
     if len(local_vars) != 0:
         for item in list(local_vars):
             if not isinstance(local_vars[item],np.ndarray):
@@ -543,14 +543,14 @@ def pyCftool(x=None, y=None, weights=None,local_vars = {}):
     sys.exit(app.exec())
 
 def main():
-    x = np.linspace(-10,10,1000)+np.random.normal(0,scale=0.1,size=1000)
+    x = np.linspace(-10,10,1000)#+np.random.normal(0,scale=0.1,size=1000)
     noise = np.random.normal(0,scale=1,size=1000)
     weights = 1/np.std(noise)*np.ones(1000)
     #y = 3/np.sqrt((x**2-4)**2+1*x**2)+noise  #Ressonance 2
     #y = 6.6*x**2-3*x+0.3+noise #Polynomial
     y = 2*x+0.2+2.2*np.sin(1.1*x)+noise
     lv = locals().copy()
-    pyCftool(x,y,weights=weights,local_vars=lv)
+    cftool(x,y,weights=weights,local_vars=lv)
 
 if __name__ == '__main__':
     main()
