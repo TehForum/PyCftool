@@ -88,7 +88,7 @@ import numpy as np
 from pyCftool import cftool
 
 x = np.linspace(-5,5,100)+np.random.normal(0,scale=0.01,size=100)
-noise = np.random.normal(0,scale=0.1,size=100)
+noise = np.random.normal(0,scale=5,size=100)
 y = 6.6*x**2-3*x+0.3+noise # Polynomial
 lv = locals().copy()
 cftool(x,y,local_vars=lv)
