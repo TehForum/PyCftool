@@ -1,6 +1,4 @@
 import numpy as np
-from scipy import optimize as optim
-from matplotlib import pyplot as plt
 import re
 
 def create_string(s,p,pv,s_clean,w,bound,method):
