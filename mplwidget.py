@@ -2,9 +2,7 @@
 # -------------------- mplwidget.py --------------------
 # ------------------------------------------------------
 from PySide6.QtWidgets import QWidget, QVBoxLayout
-
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-
 from matplotlib.figure import Figure
 
 class MplWidget(QWidget):
