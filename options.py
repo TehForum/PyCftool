@@ -1,7 +1,5 @@
 from PySide6 import QtWidgets
-from PySide6.QtWidgets import QApplication, QTableWidgetItem, QMainWindow, QPushButton, QDialog
-from PySide6 import QtGui
-import sys
+from PySide6.QtWidgets import QTableWidgetItem
 from loadgui import loadUiWidget
 import numpy as np
 
