@@ -54,7 +54,11 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QLineEdit" name="fitNameLineEdit_2"/>
+         <widget class="QLineEdit" name="fitNameLineEdit_2">
+          <property name="text">
+           <string>untitled fit 1</string>
+          </property>
+         </widget>
         </item>
         <item row="1" column="0">
          <widget class="QLabel" name="xDataLabel">
@@ -284,12 +288,28 @@
              </font>
             </property>
             <property name="text">
-             <string>Robust</string>
+             <string>Method</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QComboBox" name="robustComboBox"/>
+           <widget class="QComboBox" name="robustComboBox">
+            <item>
+             <property name="text">
+              <string>Least Squares</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>TRF</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Dogbox</string>
+             </property>
+            </item>
+           </widget>
           </item>
          </layout>
         </item>
