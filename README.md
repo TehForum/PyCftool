@@ -66,7 +66,7 @@ Requires the following packages to be installed: [PySide6](https://pypi.org/proj
 You can install pyCftool with: `pip install pyCftool`.
 
 ## Usage
-Import the function `from pyCftool import pyCftool`.
+Import the function `from pyCftool import cftool`.
 
 ### pyCftool
 #### cftool(x=None ,y=None ,weights=None ,local_vars={})
